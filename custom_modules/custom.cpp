@@ -83,12 +83,14 @@ void csc_differentiation_function( Cell* pCell, Phenotype& phenotype, double dt 
         // phenotype.volume.target_solid_cytoplasmic *= 2.0;
 
 	std::cout << "-------csc_differentiation_function ----------\n";
-    phenotype.volume.target_solid_nuclear *= 2.0;
-    phenotype.volume.target_solid_cytoplasmic *= 2.0;
+	phenotype.volume.target_solid_nuclear *= 2.0;
+	phenotype.volume.target_solid_cytoplasmic *= 2.0;
 
 	if (UniformRandom() < 0.5)
 	{
-		pCell->type = 1;
+		// pCell->type = 1;
+		// if (pCell->type == 0)
+		pCell->convert_to_cell_definition(DCC);
 	}
 	return;
 }
@@ -111,7 +113,8 @@ void create_csc_cycle_model( void )
 	csc_cycle_model.transition_rate(0,0) *= 2.0;
 
 	// csc_cycle_model.phases[0].entry_function = standard_live_phase_entry_function;  
-	csc_cycle_model.phases[0].entry_function = csc_differentiation_function;  
+	// csc_cycle_model.phases[0].entry_function = csc_differentiation_function;  
+	csc_cycle_model.phase_link(0,0).exit_function = csc_differentiation_function;  
 
 	return;
 }
@@ -133,7 +136,7 @@ void create_cell_types( void )
 	// set default cell cycle model 
 	// cell_defaults.functions.cycle_model = live; 
 	// vs.  ??
-	cell_defaults.phenotype.cycle.sync_to_cycle_model( live ); 
+	cell_defaults.phenotype.cycle.sync_to_cycle_model( live );   // rwh: can I override this later??
 	// set default_cell_functions; 
 	
 	// cell_defaults.functions.update_phenotype = update_cell_and_death_parameters_O2_based; 
@@ -141,7 +144,7 @@ void create_cell_types( void )
 	cell_defaults.functions.set_orientation = up_orientation; 
 	cell_defaults.phenotype.geometry.polarity = 1.0;
 	cell_defaults.phenotype.motility.restrict_to_2D = true; 
-	
+
 	// make sure the defaults are self-consistent. 
 	
 	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment );
@@ -164,7 +167,8 @@ void create_cell_types( void )
 
 	// initially no necrosis 
 	cell_defaults.phenotype.death.rates[necrosis_model_index] = 0.0; 
-	cell_defaults.phenotype.death.rates[apoptosis_model_index] = parameters.doubles( "CSC_apoptosis_rate" );
+	// cell_defaults.phenotype.death.rates[apoptosis_model_index] = parameters.doubles( "CSC_apoptosis_rate" );
+	cell_defaults.phenotype.death.rates[apoptosis_model_index] = 0.0;
 
 	// set oxygen uptake / secretion parameters for the default cell type 
 	cell_defaults.phenotype.secretion.uptake_rates[oxygen_substrate_index] = 10; 
@@ -185,6 +189,7 @@ void create_cell_types( void )
 
 	create_csc_cycle_model();
 	CSC.phenotype.cycle.sync_to_cycle_model( csc_cycle_model );
+	// cell_defaults.phenotype.cycle.sync_to_cycle_model( live );   // rwh: can I override this later??
 	
 	CSC.functions.cycle_model = csc_cycle_model; 
 	
@@ -226,7 +231,15 @@ void create_cell_types( void )
 	
 	// Set proliferation to 10% of other cells. 
 	// Alter the transition rate from G0G1 state to S state
-	DCC.phenotype.cycle.data.transition_rate(live_index,live_index) *= parameters.doubles( "DCC_relative_cycle_entry_rate" );
+	// DCC.phenotype.cycle.data.transition_rate(live_index,live_index) *= parameters.doubles( "DCC_relative_cycle_entry_rate" );
+
+	// DCC.phenotype.cycle.sync_to_cycle_model( live );  //rwh??
+	
+	// no birth (turn off proliferation) -- copy from Assaf's death model
+	int cycle_start_index = live.find_phase_index( PhysiCell_constants::live ); 
+	int cycle_end_index = live.find_phase_index( PhysiCell_constants::live ); 
+	// cell_defaults.phenotype.cycle.data.transition_rate( cycle_start_index , cycle_end_index ) = 0.0; 
+	DCC.phenotype.cycle.data.transition_rate( cycle_start_index , cycle_end_index ) = 0.0; 
 
 	return; 
 }
@@ -249,34 +262,34 @@ void setup_tissue( void )
 	
 	Cell* pC;
 
-	pC = create_cell(); 
+	pC = create_cell(CSC); 
 	pC->assign_position( 0.0, 0.0, 0.0 );
 
-	pC = create_cell(); 
+	pC = create_cell(CSC); 
 	pC->assign_position( -300, 0, 0.0   );
 	
-	pC = create_cell(); 
+	pC = create_cell(CSC); 
 	pC->assign_position( 0, 120, 0.0    );
 	
-	pC = create_cell(); 
+	pC = create_cell(CSC); 
 	pC->assign_position( 0, 240, 0.0    );
 
-	pC = create_cell(); 
+	pC = create_cell(CSC); 
 	pC->assign_position( 0, 360, 0.0    );
 
-	pC = create_cell(); 
+	pC = create_cell(CSC); 
 	pC->assign_position( -120, 0, 0.0    );
 
-	pC = create_cell(); 
+	pC = create_cell(CSC); 
 	pC->assign_position( -240, 0, 0.0    );
 
-	pC = create_cell(); 
+	pC = create_cell(CSC); 
 	pC->assign_position( -300, 100, 0.0   );
 
-	pC = create_cell(); 
+	pC = create_cell(CSC); 
 	pC->assign_position( -60, 200, 0.0 );
 
-	pC = create_cell(); 
+	pC = create_cell(CSC); 
 	pC->assign_position( -400, 300, 0.0 );
 	return; 
 }
