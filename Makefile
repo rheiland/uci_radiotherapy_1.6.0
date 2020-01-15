@@ -10,27 +10,14 @@ CC := g++
 ifdef PHYSICELL_CPP 
 	CC := $(PHYSICELL_CPP)
 endif
+CC := clang++
 
 ARCH := native # best auto-tuning
-# ARCH := core2 # a reasonably safe default for most CPUs since 2007
-# ARCH := corei7
-# ARCH := corei7-avx # earlier i7 
-# ARCH := core-avx-i # i7 ivy bridge or newer 
-# ARCH := core-avx2 # i7 with Haswell or newer
-# ARCH := nehalem
-# ARCH := westmere
-# ARCH := sandybridge # circa 2011
-# ARCH := ivybridge   # circa 2012
-# ARCH := haswell     # circa 2013
-# ARCH := broadwell   # circa 2014
-# ARCH := skylake     # circa 2015
-# ARCH := bonnell
-# ARCH := silvermont
-# ARCH := skylake-avx512
-# ARCH := nocona #64-bit pentium 4 or later 
 
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
-CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
+#CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
+CFLAGS := -march=$(ARCH) -g  -fomit-frame-pointer -Xpreprocessor -fopenmp -m64 -std=c++11
+PATH_TO_OMP := -L/usr/local/opt/libomp/lib
 
 COMPILE_COMMAND := $(CC) $(CFLAGS) 
 
@@ -50,11 +37,15 @@ pugixml_OBJECTS := pugixml.o
 
 PhysiCell_OBJECTS := $(BioFVM_OBJECTS)  $(pugixml_OBJECTS) $(PhysiCell_core_OBJECTS) $(PhysiCell_module_OBJECTS)
 ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS)
+ALL_OBJECTS_B := 
 
 # compile the project  
+test_b: main.cpp $(PhysiCell_OBJECTS) custom_modules/custom_b.cpp
+	$(COMPILE_COMMAND) $(PATH_TO_OMP) -lomp -o test_b $(PhysiCell_OBJECTS) custom_modules/custom_b.cpp main.cpp
 
 all: main.cpp $(ALL_OBJECTS)
-	$(COMPILE_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp 
+	# $(COMPILE_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp 
+	$(COMPILE_COMMAND) $(PATH_TO_OMP) -lomp -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp
 
 # PhysiCell core components	
 
@@ -135,6 +126,8 @@ PhysiCell_settings.o: ./modules/PhysiCell_settings.cpp
 
 custom.o: ./custom_modules/custom.cpp 
 	$(COMPILE_COMMAND) -c ./custom_modules/custom.cpp
+custom_b.o: ./custom_modules/custom_b.cpp 
+	$(COMPILE_COMMAND) -c ./custom_modules/custom_b.cpp
 
 # cleanup
 

@@ -81,7 +81,7 @@ double one_minus_prob_p = 0.5;
 void differentiate_daughter_cell( Cell* pCell, Phenotype& phenotype, double dt )
 {
 	// if ((pCell->type == 0) && (UniformRandom() < 0.5))
-	if (UniformRandom() < 0.5)
+	if (UniformRandom() <= one_minus_prob_p)
 	{
 		// pCell->type = 1;
 		// if (pCell->type == 0)
@@ -92,53 +92,53 @@ void differentiate_daughter_cell( Cell* pCell, Phenotype& phenotype, double dt )
 }
 
 // rf. my_mutation_function in User Guide
-void csc_phase_entry_function( Cell* pCell, Phenotype& phenotype, double dt )
-{
-	// recall
-	// void standard_live_phase_entry_function( Cell* pCell, Phenotype& phenotype, double dt )
-        // the cell wants to double its volume
-        // phenotype.volume.target_solid_nuclear *= 2.0;
-        // phenotype.volume.target_solid_cytoplasmic *= 2.0;
+// void csc_phase_entry_function( Cell* pCell, Phenotype& phenotype, double dt )
+// {
+// 	// recall
+// 	// void standard_live_phase_entry_function( Cell* pCell, Phenotype& phenotype, double dt )
+//         // the cell wants to double its volume
+//         // phenotype.volume.target_solid_nuclear *= 2.0;
+//         // phenotype.volume.target_solid_cytoplasmic *= 2.0;
 
-	std::cout << "-------csc_phase_entry_function ----------\n";
-	// phenotype.volume.target_solid_nuclear *= 2.0;
-	// phenotype.volume.target_solid_cytoplasmic *= 2.0;
+// 	std::cout << "-------csc_phase_entry_function ----------\n";
+// 	// phenotype.volume.target_solid_nuclear *= 2.0;
+// 	// phenotype.volume.target_solid_cytoplasmic *= 2.0;
 
-	if (UniformRandom() <= one_minus_prob_p)
-	{
-		std::cout << "           csc_phase_entry_function: CSC --> DCC ----------\n";
-		// pCell->type = 1;
-		// if (pCell->type == 0)
-		pCell->convert_to_cell_definition(DCC);
-	}
-	return;
-}
+// 	if (UniformRandom() <= one_minus_prob_p)
+// 	{
+// 		std::cout << "           csc_phase_entry_function: CSC --> DCC ----------\n";
+// 		// pCell->type = 1;
+// 		// if (pCell->type == 0)
+// 		pCell->convert_to_cell_definition(DCC);
+// 	}
+// 	return;
+// }
 
-void create_csc_cycle_model( void )
-{
-	std::cout << "-------------  create_csc_cycle_model() -------------------- \n";
-	// csc_cycle_model.code = PhysiCell_constants::custom_cycle_model;
-	csc_cycle_model.code = PhysiCell_constants::live_cells_cycle_model;
-	csc_cycle_model.name = "CSC cycle";
+// void create_csc_cycle_model( void )
+// {
+// 	std::cout << "-------------  create_csc_cycle_model() -------------------- \n";
+// 	// csc_cycle_model.code = PhysiCell_constants::custom_cycle_model;
+// 	csc_cycle_model.code = PhysiCell_constants::live_cells_cycle_model;
+// 	csc_cycle_model.name = "CSC cycle";
 
-	csc_cycle_model.data.time_units = "min";
+// 	csc_cycle_model.data.time_units = "min";
 
-	// csc_cycle_model.add_phase( PhysiCell_constants::live , "Live" );
-	// csc_cycle_model.add_phase( PhysiCell_constants::custom_cycle_model , "CSC cycle" );
+// 	// csc_cycle_model.add_phase( PhysiCell_constants::live , "Live" );
+// 	// csc_cycle_model.add_phase( PhysiCell_constants::custom_cycle_model , "CSC cycle" );
 
-	// csc_cycle_model.phases[0].division_at_phase_exit = true;
+// 	// csc_cycle_model.phases[0].division_at_phase_exit = true;
 
-	// csc_cycle_model.add_phase_link( 0 , 0 , NULL );
+// 	// csc_cycle_model.add_phase_link( 0 , 0 , NULL );
 
-	// csc_cycle_model.transition_rate(0,0) = 0.0432 / 60.0; // MCF10A have ~0.04 1/hr net birth rate
-	// csc_cycle_model.transition_rate(0,0) *= 2.0;
+// 	// csc_cycle_model.transition_rate(0,0) = 0.0432 / 60.0; // MCF10A have ~0.04 1/hr net birth rate
+// 	// csc_cycle_model.transition_rate(0,0) *= 2.0;
 
-	// csc_cycle_model.phases[0].entry_function = standard_live_phase_entry_function;  
-	csc_cycle_model.phases[0].entry_function = csc_phase_entry_function;  
-	// csc_cycle_model.phase_link(0,0).exit_function = csc_differentiation_function;  
+// 	// csc_cycle_model.phases[0].entry_function = standard_live_phase_entry_function;  
+// 	csc_cycle_model.phases[0].entry_function = csc_phase_entry_function;  
+// 	// csc_cycle_model.phase_link(0,0).exit_function = csc_differentiation_function;  
 
-	return;
-}
+// 	return;
+// }
 
 void create_cell_types( void )
 {
@@ -282,7 +282,7 @@ void setup_microenvironment( void )
 	return; 
 }
 
-void setup_tissue( void )
+void setup_tissue_more( void )
 {
 	double pct = 0.7;
 	double length_x = (microenvironment.mesh.bounding_box[3] - microenvironment.mesh.bounding_box[0]) * pct; 
@@ -304,10 +304,10 @@ void setup_tissue( void )
 	}
 }
 
-void setup_tissue_orig( void )
+// void setup_tissue_orig( void )
+void setup_tissue( void )
 {
 	// create some cells near the origin
-	
 	Cell* pC;
 
 	// upper batch (that divide more often earlier)
@@ -322,6 +322,7 @@ void setup_tissue_orig( void )
 
 	pC = create_cell(CSC); 
 	pC->assign_position( -60, 200, 0.0 );
+
 
 	// remainder
 	pC = create_cell(CSC); 
@@ -338,7 +339,6 @@ void setup_tissue_orig( void )
 
 	pC = create_cell(CSC); 
 	pC->assign_position( -300, 100, 0.0   );
-
 
 	pC = create_cell(CSC); 
 	pC->assign_position( -400, 300, 0.0 );
@@ -371,13 +371,16 @@ void check_cell_cycle_and_differentiate( Cell* pCell, Phenotype& phenotype, doub
 	{
 		double elapsed_time = phenotype.cycle.data.elapsed_time_in_phase;
 		// if ((elapsed_time < 0.6) && (pCell->type == 0))
-		if (elapsed_time < 0.6) 
+		// phenotype.execute_cycle_phase_entry_function = true; 
+		if (phenotype.execute_cycle_phase_entry_function && elapsed_time < 0.6) 
 		{
-			// std::cout << __FUNCTION__ << "pCell->ID = "<< pCell->ID << ", elapsed_time_in_phase = " << elapsed_time << ", current_time = " << PhysiCell_globals.current_time<< std::endl;
+			std::cout << __FUNCTION__ << "pCell->ID = "<< pCell->ID << ", elapsed_time_in_phase = " << elapsed_time << ", current_time = " << PhysiCell_globals.current_time<< std::endl;
 			std::cout << "pCell->ID = "<< pCell->ID << ", elapsed_time_in_phase = " << elapsed_time;
 			std::cout << ", current_time = " << PhysiCell_globals.current_time<< std::endl;
 			std::cout << ", flagged_for_division = " << phenotype.flagged_for_division << std::endl;
  			differentiate_daughter_cell(pCell, phenotype, dt);
+
+			phenotype.execute_cycle_phase_entry_function = false;
 		}
 	}
 }

@@ -392,6 +392,7 @@ Cell* Cell::divide( )
 	// phenotype.flagged_for_division = false; 
 	// phenotype.flagged_for_removal = false; 
 	
+	std::cout << ">>>>>>>>  " << __FUNCTION__ << "   <<<<<<<<\n\n";
 	Cell* child = create_cell();
 	child->copy_data( this );	
 	child->copy_function_pointers(this);
@@ -445,6 +446,9 @@ Cell* Cell::divide( )
 	// child->set_phenotype( phenotype ); 
 	child->phenotype = phenotype; 
 	
+	phenotype.execute_cycle_phase_entry_function = true; 
+	child->phenotype.execute_cycle_phase_entry_function = true; 
+
 	return child;
 }
 
