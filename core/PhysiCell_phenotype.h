@@ -543,6 +543,7 @@ class Phenotype
  public:
 	bool flagged_for_division; 
 	bool flagged_for_removal; 
+	bool execute_cycle_phase_entry_function;  //rwh
  
 	Cycle cycle; 
 	Death death; 

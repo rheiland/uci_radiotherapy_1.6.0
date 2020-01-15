@@ -65,6 +65,7 @@
 ###############################################################################
 */
 
+#include "./PhysiCell_cell.h"  //rwh
 #include "./PhysiCell_phenotype.h"
 
 #include "../BioFVM/BioFVM.h"
@@ -74,6 +75,7 @@
 using namespace BioFVM; 
 
 namespace PhysiCell{
+
 	
 Phase::Phase()
 {
@@ -278,6 +280,7 @@ Phase_Link& Cycle_Model::phase_link( int start_index, int end_index )
 void Cycle_Model::advance_model( Cell* pCell, Phenotype& phenotype, double dt )
 {
 	int i = phenotype.cycle.data.current_phase_index; 
+	// std::cout << __FUNCTION__ <<"====: current_time = " << PhysiCell_globals.current_time<< std::endl;
 	
 	phenotype.cycle.data.elapsed_time_in_phase += dt; 
 
@@ -289,6 +292,7 @@ void Cycle_Model::advance_model( Cell* pCell, Phenotype& phenotype, double dt )
 	for( int k=0 ; k < phase_links[i].size() ; k++ )
 	{
 		j = phase_links[i][k].end_phase_index; 
+		// std::cout << __FUNCTION__ << "------- j = " << j << std::endl;
 		
 		// check for arrest. If arrested, skip to the next transition
 		bool transition_arrested = false; 
@@ -302,6 +306,7 @@ void Cycle_Model::advance_model( Cell* pCell, Phenotype& phenotype, double dt )
 			bool continue_transition = false; 
 			if( phase_links[i][k].fixed_duration )
 			{
+				// std::cout << __FUNCTION__ << "------- yes, fixed_duration\n";
 				if( phenotype.cycle.data.elapsed_time_in_phase > 1.0/phenotype.cycle.data.transition_rates[i][k] )
 				{
 					continue_transition = true; 
@@ -310,6 +315,7 @@ void Cycle_Model::advance_model( Cell* pCell, Phenotype& phenotype, double dt )
 			else
 			{
 				double prob = phenotype.cycle.data.transition_rates[i][k]*dt; 
+				// std::cout << __FUNCTION__ << "------- no, not fixed_duration, prob= " << prob << std::endl;
 				if( UniformRandom() <= prob )
 				{
 					continue_transition = true; 
@@ -320,6 +326,7 @@ void Cycle_Model::advance_model( Cell* pCell, Phenotype& phenotype, double dt )
 			
 			if( continue_transition )
 			{
+				// std::cout << __FUNCTION__ << "------- continue_transition\n";
 				// if the phase transition has an exit function, execute it
 				if( phase_links[i][k].exit_function )
 				{
@@ -330,6 +337,7 @@ void Cycle_Model::advance_model( Cell* pCell, Phenotype& phenotype, double dt )
 				if( phases[i].division_at_phase_exit )
 				{
 					// pCell->flag_for_division();
+					std::cout << __FUNCTION__ << "-------------->>> flagged_for_division,   pCell->ID = " << pCell->ID << std::endl;
 					phenotype.flagged_for_division = true; 
 				}
 				if( phases[i].removal_at_phase_exit )
@@ -343,13 +351,21 @@ void Cycle_Model::advance_model( Cell* pCell, Phenotype& phenotype, double dt )
 				phenotype.cycle.data.elapsed_time_in_phase = 0.0; 
 				
 				// if the new phase has an entry function, execute it 
-				if( phases[j].entry_function )
+				// if( phases[j].entry_function )
+				if( phases[j].entry_function && phenotype.execute_cycle_phase_entry_function)  //rwh
 				{
+					// std::cout << __FUNCTION__ << "-------------->>> exec entry_function,   pCell->ID = " << pCell->ID << std::endl;
+					// std::cout << __FUNCTION__ << "-------------->>> exec entry_function,   pCell->type_name = " << pCell->type_name << std::endl;
 					phases[j].entry_function( pCell,phenotype,dt );  
+					phenotype.execute_cycle_phase_entry_function = false;  //rwh
 				}
+				else
+					// std::cout << __FUNCTION__ << "------- phases[j] = NULL\n";
 				
 				return; 
 			}
+			// else
+				// std::cout << __FUNCTION__ << "------- DON'T continue_transition\n";
 			
 		}
 		
@@ -1036,6 +1052,7 @@ Phenotype::Phenotype()
 {
 	flagged_for_division = false;
 	flagged_for_removal = false; 
+	execute_cycle_phase_entry_function = false;   //rwh
 	
 	// sync the molecular stuff here automatically? 
 	
