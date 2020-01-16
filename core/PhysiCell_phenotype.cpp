@@ -351,13 +351,13 @@ void Cycle_Model::advance_model( Cell* pCell, Phenotype& phenotype, double dt )
 				phenotype.cycle.data.elapsed_time_in_phase = 0.0; 
 				
 				// if the new phase has an entry function, execute it 
-				// if( phases[j].entry_function )
-				if( phases[j].entry_function && phenotype.execute_cycle_phase_entry_function)  //rwh
+				if( phases[j].entry_function )
+				// if( phases[j].entry_function && phenotype.execute_cycle_phase_entry_function)  //rwh
 				{
 					// std::cout << __FUNCTION__ << "-------------->>> exec entry_function,   pCell->ID = " << pCell->ID << std::endl;
 					// std::cout << __FUNCTION__ << "-------------->>> exec entry_function,   pCell->type_name = " << pCell->type_name << std::endl;
 					phases[j].entry_function( pCell,phenotype,dt );  
-					phenotype.execute_cycle_phase_entry_function = false;  //rwh
+					// phenotype.execute_cycle_phase_entry_function = false;  //rwh
 				}
 				else
 					// std::cout << __FUNCTION__ << "------- phases[j] = NULL\n";

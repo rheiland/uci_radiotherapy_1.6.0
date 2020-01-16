@@ -40,12 +40,15 @@ ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS)
 ALL_OBJECTS_B := 
 
 # compile the project  
-test_b: main.cpp $(PhysiCell_OBJECTS) custom_modules/custom_b.cpp
-	$(COMPILE_COMMAND) $(PATH_TO_OMP) -lomp -o test_b $(PhysiCell_OBJECTS) custom_modules/custom_b.cpp main.cpp
-
 all: main.cpp $(ALL_OBJECTS)
 	# $(COMPILE_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp 
 	$(COMPILE_COMMAND) $(PATH_TO_OMP) -lomp -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp
+
+test_b: main.cpp $(PhysiCell_OBJECTS) custom_modules/custom_b.cpp
+	$(COMPILE_COMMAND) $(PATH_TO_OMP) -lomp -o test_b $(PhysiCell_OBJECTS) custom_modules/custom_b.cpp main.cpp
+test_4cells: main.cpp $(PhysiCell_OBJECTS) custom_modules/custom_4cells.cpp
+	$(COMPILE_COMMAND) $(PATH_TO_OMP) -lomp -o test_4cells $(PhysiCell_OBJECTS) custom_modules/custom_4cells.cpp main.cpp
+
 
 # PhysiCell core components	
 
@@ -128,6 +131,8 @@ custom.o: ./custom_modules/custom.cpp
 	$(COMPILE_COMMAND) -c ./custom_modules/custom.cpp
 custom_b.o: ./custom_modules/custom_b.cpp 
 	$(COMPILE_COMMAND) -c ./custom_modules/custom_b.cpp
+custom_2cells.o: ./custom_modules/custom_2cells.cpp 
+	$(COMPILE_COMMAND) -c ./custom_modules/custom_2cells.cpp
 
 # cleanup
 
